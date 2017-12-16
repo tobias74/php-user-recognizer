@@ -28,8 +28,13 @@ class UserSessionRecognizer
       $this->userRepository = new \PhpCrudMongo\Repository($this->getConfig(), new UserMapper());
     }
     
-    return $this->userMapper;
+    return $this->userRepository;
     
+  }
+
+  public function getUserById($userId)
+  {
+    return $this->getUserRepository()->getById($userId);
   }
 
   public function recognizeAuthenticatedUser()
@@ -43,7 +48,7 @@ class UserSessionRecognizer
     }
     else 
     {
-      $userSession = new \Zeitfaden\UserSession\AnonymousUserSession();      
+      $userSession = new AnonymousUserSession();      
     }
 
 
@@ -78,16 +83,16 @@ class UserSessionRecognizer
   {
       $userSmall = $this->getAuth0()->getUser();
       
-      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0WebsiteDomain);
+      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
       $userData = $auth0Api->users->get($userSmall['sub']);      
       
 
-      $userSession = new \Zeitfaden\UserSession\Auth0Session();      
+      $userSession = new Auth0Session();      
       try
       {
         $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($userData['user_id']);
       }
-      catch (\Zeitfaden\Exception\NoMatchException $e)
+      catch (\PhpCrudMongo\NoMatchException $e)
       {
         $loggedInUser = new User();
         $loggedInUser->setAuth0Id($userData['user_id']);
