@@ -1,5 +1,5 @@
 <?php
-namespace Zeitfaden\UserSession;
+namespace PhpUserRecognizer;
 
 class Auth0Session extends AbstractUserSession
 {

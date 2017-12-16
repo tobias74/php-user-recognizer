@@ -3,5 +3,10 @@
     "description": "a very simple user-session storage based on MongoDB using the Auth0-Service",
     "type": "library",
     "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "PhpUserRecognizer\\": "src/"
+        }
+    },
     "require": {}
 }

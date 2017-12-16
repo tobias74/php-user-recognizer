@@ -1,5 +1,5 @@
 <?php
-namespace Zeitfaden\UserSession;
+namespace PhpUserRecognizer;
 
 
 class UserSessionRecognizer
@@ -8,8 +8,29 @@ class UserSessionRecognizer
   use \Zeitfaden\Traits\UserRepositoryGetter,\Zeitfaden\Traits\ConfigGetter;
 
   protected $auth0;
+  protected $userRepository;
 
 
+  public function __construct($config)
+  {
+    $this->config = $config;
+  }
+  
+  protected function getConfig()
+  {
+    return $this->config;
+  }
+
+  protected function getUserRepository()
+  {
+    if (!$this->userRepository)
+    {
+      $this->userRepository = new \PhpCrudMongo\Repository($this->getConfig(), new UserMapper());
+    }
+    
+    return $this->userMapper;
+    
+  }
 
   public function recognizeAuthenticatedUser()
   {
@@ -37,11 +58,11 @@ class UserSessionRecognizer
     if (!$this->auth0)
     {
       $this->auth0 = new \Auth0\SDK\Auth0(array(
-          'domain'        => $this->getConfig()->auth0WebsiteDomain,
-          'client_id'     => $this->getConfig()->auth0WebsiteClientId,
-          'client_secret' => $this->getConfig()->auth0WebsiteSecret,
-          'redirect_uri'  => $this->getConfig()->auth0WebsiteCallback,
-          'audience'      => 'https://'.$this->getConfig()->auth0WebsiteDomain.'/userinfo',
+          'domain'        => $this->getConfig()->auth0Domain,
+          'client_id'     => $this->getConfig()->auth0ClientId,
+          'client_secret' => $this->getConfig()->auth0Secret,
+          'redirect_uri'  => $this->getConfig()->auth0Callback,
+          'audience'      => 'https://'.$this->getConfig()->auth0Domain.'/userinfo',
           'persist_id_token' => true,
           'persist_access_token' => true,
           'persist_refresh_token' => true

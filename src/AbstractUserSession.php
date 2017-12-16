@@ -1,5 +1,5 @@
 <?php
-namespace Zeitfaden\UserSession;
+namespace PhpUserRecognizer;
 
 class AbstractUserSession
 {
