@@ -1,0 +1,7 @@
+{
+    "name": "tobias74/php-user-recognizer",
+    "description": "a very simple user-session storage based on MongoDB using the Auth0-Service",
+    "type": "library",
+    "license": "MIT",
+    "require": {}
+}
