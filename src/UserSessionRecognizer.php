@@ -5,8 +5,6 @@ namespace PhpUserRecognizer;
 class UserSessionRecognizer
 {
 
-  use \Zeitfaden\Traits\UserRepositoryGetter,\Zeitfaden\Traits\ConfigGetter;
-
   protected $auth0;
   protected $userRepository;
 
