@@ -38,11 +38,21 @@ class UserSessionRecognizer
   public function recognizeAuthenticatedUser()
   {
     
-    $userData = $this->getAuth0()->getUser();
-
-    if ($userData)
+    $userSmall = $this->getAuth0()->getUser();
+    if ($userSmall)
     {
-      $userSession = $this->recognizeUserByAuth0Session();
+      $userSession = new Auth0Session();      
+      if ($this->userExistsLocally($userSmall['sub']))
+      {
+        $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($userSmall['sub']);
+        $this->sporadicallyUpdateUserData($loggedInUser);
+      }
+      else 
+      {
+        $loggedInUser = $this->introduceUserLocally($userSmall['sub']);
+      }
+
+      $userSession->setLoggedInUserId($loggedInUser->getId());
     }
     else 
     {
@@ -77,38 +87,48 @@ class UserSessionRecognizer
   }
 
 
-  protected function recognizeUserByAuth0Session()
+  protected function userExistsLocally($auth0UserId)
   {
-      $userSmall = $this->getAuth0()->getUser();
-      
-      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
-      $userData = $auth0Api->users->get($userSmall['sub']);      
-      
-
-      $userSession = new Auth0Session();      
       try
       {
-        $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($userData['user_id']);
+        $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($auth0UserId);
+        return true;
       }
       catch (\PhpCrudMongo\NoMatchException $e)
       {
-        $loggedInUser = new User();
-        $loggedInUser->setAuth0Id($userData['user_id']);
-        $this->getUserRepository()->merge($loggedInUser);
+        return false;
       }
+  }
+
+  
+
+  protected function introduceUserLocally($auth0UserId)
+  {
+      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
+      $userData = $auth0Api->users->get($auth0UserId);      
+
+      $newLocalUser = new User();
+      $newLocalUser->setAuth0Id($userData['user_id']);
+      $newLocalUser->profileImage = $userData['picture'];
+      $newLocalUser->displayName = isset($userData['given_name']) ? $userData['given_name'] : $userData['nickname'];
+      $this->getUserRepository()->merge($newLocalUser);
       
-      $loggedInUser->profileImage = $userData['picture'];
-      $loggedInUser->displayName = isset($userData['given_name']) ? $userData['given_name'] : $userData['nickname'];
-      $this->getUserRepository()->merge($loggedInUser);
-      
-      $userSession->setLoggedInUserId($loggedInUser->getId());
-      
-      return $userSession;
- }
+      return $newLocalUser;
+  }
 
 
+  protected function sporadicallyUpdateUserData($user)
+  {
+    if (rand(0,50) === 1)
+    {
+      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
+      $userData = $auth0Api->users->get($user->getAuth0Id());      
 
-    
-    
-    
+      $user->setAuth0Id($userData['user_id']);
+      $user->profileImage = $userData['picture'];
+      $user->displayName = isset($userData['given_name']) ? $userData['given_name'] : $userData['nickname'];
+      $this->getUserRepository()->merge($user);
+    }
+  }
+
 }
