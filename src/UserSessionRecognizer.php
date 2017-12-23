@@ -108,10 +108,7 @@ class UserSessionRecognizer
       $userData = $auth0Api->users->get($auth0UserId);      
 
       $newLocalUser = new User();
-      $newLocalUser->setAuth0Id($userData['user_id']);
-      $newLocalUser->profileImage = $userData['picture'];
-      $newLocalUser->displayName = isset($userData['given_name']) ? $userData['given_name'] : $userData['nickname'];
-      $this->getUserRepository()->merge($newLocalUser);
+      $this->updateUserWithData($newLocalUser, $userData);
       
       return $newLocalUser;
   }
@@ -124,11 +121,15 @@ class UserSessionRecognizer
       $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
       $userData = $auth0Api->users->get($user->getAuth0Id());      
 
+      $this->updateUserWithData($user, $userData);
+    }
+  }
+
+  protected function updateUserWithData($user, $userData)
+  {
       $user->setAuth0Id($userData['user_id']);
       $user->profileImage = $userData['picture'];
       $user->displayName = isset($userData['given_name']) ? $userData['given_name'] : $userData['nickname'];
       $this->getUserRepository()->merge($user);
-    }
   }
-
 }
