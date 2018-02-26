@@ -71,11 +71,11 @@ class UserSessionRecognizer
     if (!$this->auth0)
     {
       $this->auth0 = new \Auth0\SDK\Auth0(array(
-          'domain'        => $this->getConfig()->auth0Domain,
-          'client_id'     => $this->getConfig()->auth0ClientId,
-          'client_secret' => $this->getConfig()->auth0Secret,
-          'redirect_uri'  => $this->getConfig()->auth0Callback,
-          'audience'      => 'https://'.$this->getConfig()->auth0Domain.'/userinfo',
+          'domain'        => $this->getConfig()['auth0Domain'],
+          'client_id'     => $this->getConfig()['auth0ClientId'],
+          'client_secret' => $this->getConfig()['auth0Secret'],
+          'redirect_uri'  => $this->getConfig()['auth0Callback'],
+          'audience'      => 'https://'.$this->getConfig()['auth0Domain'].'/userinfo',
           'persist_id_token' => true,
           'persist_access_token' => true,
           'persist_refresh_token' => true
@@ -104,7 +104,7 @@ class UserSessionRecognizer
 
   protected function introduceUserLocally($auth0UserId)
   {
-      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
+      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()['auth0Domain']);
       $userData = $auth0Api->users->get($auth0UserId);      
 
       $newLocalUser = new User();
@@ -118,7 +118,7 @@ class UserSessionRecognizer
   {
     if (rand(0,50) === 1)
     {
-      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()->auth0Domain);
+      $auth0Api = new \Auth0\SDK\Auth0Api($this->getAuth0()->getIdToken(), $this->getConfig()['auth0Domain']);
       $userData = $auth0Api->users->get($user->getAuth0Id());      
 
       $this->updateUserWithData($user, $userData);
