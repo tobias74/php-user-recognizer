@@ -29,6 +29,11 @@ class UserSessionRecognizer
     return $this->userRepository;
     
   }
+  
+  public function setUserRepository($val)
+  {
+    $this->userRepository = $val;
+  }
 
   public function getUserById($userId)
   {
