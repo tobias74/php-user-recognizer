@@ -58,6 +58,7 @@ class UserSessionRecognizer
       }
 
       $userSession->setLoggedInUserId($loggedInUser->getId());
+      $userSession->setLoggedInUser( $loggedInUser );
     }
     else 
     {

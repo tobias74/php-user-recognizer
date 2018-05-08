@@ -4,6 +4,7 @@ namespace PhpUserRecognizer;
 class AbstractUserSession
 {
 	protected $loggedInUserId = false;
+	protected $loggedInUser;
 
   
   public function setAuth0($val)
@@ -24,6 +25,16 @@ class AbstractUserSession
   public function getLoggedInUserId()
   {
     return $this->loggedInUserId;
+  }
+
+  public function setLoggedInUser($val)
+  {
+    $this->loggedInUser = $val;
+  }
+  
+  public function getLoggedInUser()
+  {
+    return $this->loggedInUser;
   }
 
 	public function isUserLoggedIn()
