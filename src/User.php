@@ -28,7 +28,25 @@ class User
         $this->auth0Id = $val;
     }
     
+	public function getProfileImage()
+	{
+		return $this->profileImage;
+	}
+    
+	public function setProfileImage($val)
+	{
+		$this->profileImage = $val;
+	}
 
+	public function getDisplayName()
+	{
+		return $this->displayName;
+	}
+    
+	public function setDisplayName($val)
+	{
+		$this->displayName = $val;
+	}
 
     
 }
