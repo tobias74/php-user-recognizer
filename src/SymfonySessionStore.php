@@ -2,7 +2,7 @@
 namespace PhpUserRecognizer;
 
 
-class SymfonySessionStore implements \Auth0\SDK\Store
+class SymfonySessionStore implements \Auth0\SDK\Store\StoreInterface
 {
 
     public function __construct($symfonySession)
