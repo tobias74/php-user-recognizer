@@ -75,7 +75,7 @@ class UserSessionRecognizer
   {
     if (!$this->auth0)
     {
-      $this->auth0 = new \Auth0\SDK\Auth0(array(
+      $config = array(
           'domain'        => $this->getConfig()['auth0Domain'],
           'client_id'     => $this->getConfig()['auth0ClientId'],
           'client_secret' => $this->getConfig()['auth0Secret'],
@@ -84,7 +84,14 @@ class UserSessionRecognizer
           'persist_id_token' => true,
           'persist_access_token' => true,
           'persist_refresh_token' => true
-      ));    
+      );
+
+      if (isset($this->getConfig()['auth0SessionStore']))
+      {
+        $config['store'] = $this->getConfig()['auth0SessionStore'];
+      }
+      
+      $this->auth0 = new \Auth0\SDK\Auth0($config);    
     }
     
     return $this->auth0;
