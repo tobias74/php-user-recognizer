@@ -40,12 +40,15 @@ class UserSessionRecognizer
     return $this->getUserRepository()->getById($userId);
   }
 
-  public function recognizeAuthenticatedUser()
+  public function recognizeAuthenticatedUser($session)
   {
+    $auth0 = $this->getAuth0($session);
+
+    $userSmall = $auth0->getUser();
     
-    $userSmall = $this->getAuth0()->getUser();
     if ($userSmall)
     {
+      error_log('I got a user from Auth0');
       $userSession = new Auth0Session();      
       if ($this->userExistsLocally($userSmall['sub']))
       {
@@ -62,41 +65,38 @@ class UserSessionRecognizer
     }
     else 
     {
+      error_log('i did not get user form auth0');
       $userSession = new AnonymousUserSession();      
     }
 
 
-    $userSession->setAuth0($this->getAuth0());
+    $userSession->setAuth0($auth0);
     return $userSession;
   }
 
 
 
-  protected function getAuth0()
+  protected function getAuth0($symfonySession=null)
   {
-    if (!$this->auth0)
-    {
-      $config = array(
-          'domain'        => $this->getConfig()['auth0Domain'],
-          'client_id'     => $this->getConfig()['auth0ClientId'],
-          'client_secret' => $this->getConfig()['auth0Secret'],
-          'redirect_uri'  => $this->getConfig()['auth0Callback'],
-          'audience'      => 'https://'.$this->getConfig()['auth0Domain'].'/userinfo',
-          'persist_id_token' => true,
-          'persist_access_token' => true,
-          'persist_refresh_token' => true
-      );
+    $config = array(
+        'domain'        => $this->getConfig()['auth0Domain'],
+        'client_id'     => $this->getConfig()['auth0ClientId'],
+        'client_secret' => $this->getConfig()['auth0Secret'],
+        'redirect_uri'  => $this->getConfig()['auth0Callback'],
+        'audience'      => 'https://'.$this->getConfig()['auth0Domain'].'/userinfo',
+        'persist_id_token' => true,
+        'persist_access_token' => true,
+        'persist_refresh_token' => true
+    );
 
-      if (isset($this->getConfig()['auth0SessionStore']))
-      {
-        $config['store'] = $this->getConfig()['auth0SessionStore'];
-      }
-      
-      $this->auth0 = new \Auth0\SDK\Auth0($config);    
+    if ($symfonySession)
+    {
+      error_log('########### Inside the UserSessionRecognizer, the session store has ID: '.$symfonySession->getId());
+      $config['store'] = new SymfonySessionStore($symfonySession);
     }
-    
-    return $this->auth0;
-    
+
+    return (new \Auth0\SDK\Auth0($config));    
+
   }
 
 

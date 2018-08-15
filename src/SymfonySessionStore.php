@@ -18,7 +18,8 @@ class SymfonySessionStore implements \Auth0\SDK\Store\StoreInterface
 
     public function get($key, $default = null)
     {
-        return $this->symfonySession->get($key, $default);
+        $value = $this->symfonySession->get($key, $default);
+        return $value;
     }
 
 
@@ -28,5 +29,12 @@ class SymfonySessionStore implements \Auth0\SDK\Store\StoreInterface
     }
 
 
+
+    // these are not part of the interface above
+    
+    public function getId()
+    {
+        return $this->symfonySession->getId();
+    }
     
 }
