@@ -23,7 +23,7 @@ class UserSessionRecognizer
   {
     if (!$this->userRepository)
     {
-      $this->userRepository = new \PhpCrudMongo\Repository($this->getConfig(), new UserMapper());
+      $this->userRepository = new \Speckvisit\Crud\MongoDb\Repository($this->getConfig(), new UserMapper());
     }
     
     return $this->userRepository;
@@ -39,6 +39,18 @@ class UserSessionRecognizer
   {
     return $this->getUserRepository()->getById($userId);
   }
+
+  
+  public function getUserFactory()
+  {
+    return $this->userFactory;
+  }
+
+  public function setUserFactory($val)
+  {
+    $this->userFactory = $val;
+  }
+
 
   public function recognizeAuthenticatedUser($session)
   {
@@ -92,6 +104,10 @@ class UserSessionRecognizer
     {
       $config['store'] = new SymfonySessionStore($symfonySession);
     }
+    else 
+    {
+      throw new \Exception("no symfony session given???????");
+    }
 
     $auth0 = new \Auth0\SDK\Auth0($config);
     return $auth0;    
@@ -106,7 +122,7 @@ class UserSessionRecognizer
         $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($auth0UserId);
         return true;
       }
-      catch (\PhpCrudMongo\NoMatchException $e)
+      catch (\Speckvisit\Crud\MongoDb\NoMatchException $e)
       {
         return false;
       }
@@ -119,7 +135,7 @@ class UserSessionRecognizer
       $auth0Api = new \Auth0\SDK\Auth0Api($idToken, $this->getConfig()['auth0Domain']);
       $userData = $auth0Api->users->get($auth0UserId);      
 
-      $newLocalUser = new User();
+      $newLocalUser = $this->getUserFactory()->create();
       $this->updateUserWithData($newLocalUser, $userData);
       return $newLocalUser;
   }
