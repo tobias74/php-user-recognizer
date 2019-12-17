@@ -79,6 +79,9 @@ class UserSessionRecognizer
             'client_id' => $this->getConfig()['auth0ClientId'],
             'client_secret' => $this->getConfig()['auth0Secret'],
             'redirect_uri' => $this->getConfig()['auth0Callback'],
+            'persist_id_token' => true,
+            'persist_access_token' => true,
+            'persist_refresh_token' => true,
             'scope' => 'openid profile email',
         );
 
