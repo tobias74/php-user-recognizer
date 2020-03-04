@@ -49,14 +49,13 @@ class UserSessionRecognizer
     public function recognizeAuthenticatedUser($session)
     {
         $auth0 = $this->getAuth0($session);
-
         $userSmall = $auth0->getUser();
 
         if ($userSmall) {
             $userSession = new Auth0Session();
             if ($this->userExistsLocally($userSmall['sub'])) {
                 $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($userSmall['sub']);
-                $this->sporadicallyUpdateUserData($auth0->getIdToken(), $loggedInUser);
+                $this->sporadicallyUpdateUserData($loggedInUser, $userSmall);
             } else {
                 $loggedInUser = $this->introduceUserLocally($auth0->getIdToken(), $userSmall['sub']);
             }
@@ -79,9 +78,6 @@ class UserSessionRecognizer
             'client_id' => $this->getConfig()['auth0ClientId'],
             'client_secret' => $this->getConfig()['auth0Secret'],
             'redirect_uri' => $this->getConfig()['auth0Callback'],
-            'persist_id_token' => true,
-            'persist_access_token' => true,
-            'persist_refresh_token' => true,
             'scope' => 'openid profile email',
         );
 
@@ -118,19 +114,16 @@ class UserSessionRecognizer
         return $newLocalUser;
     }
 
-    protected function sporadicallyUpdateUserData($idToken, $user)
+    protected function sporadicallyUpdateUserData($loggedInUser, $userData)
     {
         if (1 === rand(0, 50)) {
-            $auth0Api = new \Auth0\SDK\Auth0Api($idToken, $this->getConfig()['auth0Domain']);
-            $userData = $auth0Api->users->get($user->getAuth0Id());
-
-            $this->updateUserWithData($user, $userData);
+            $this->updateUserWithData($loggedInUser, $userData);
         }
     }
 
     protected function updateUserWithData($user, $userData)
     {
-        $user->setAuth0Id($userData['user_id']);
+        $user->setAuth0Id($userData['sub']);
         $user->profileImage = $userData['picture'];
         $user->displayName = isset($userData['given_name']) ? $userData['given_name'] : $userData['nickname'];
         $this->getUserRepository()->merge($user);
