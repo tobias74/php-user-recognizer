@@ -57,7 +57,7 @@ class UserSessionRecognizer
                 $loggedInUser = $this->getUserRepository()->getOneByAuth0Id($userSmall['sub']);
                 $this->sporadicallyUpdateUserData($loggedInUser, $userSmall);
             } else {
-                $loggedInUser = $this->introduceUserLocally($auth0->getIdToken(), $userSmall['sub']);
+                $loggedInUser = $this->introduceUserLocally($userSmall);
             }
 
             $userSession->setLoggedInUserId($loggedInUser->getId());
@@ -103,11 +103,8 @@ class UserSessionRecognizer
         }
     }
 
-    protected function introduceUserLocally($idToken, $auth0UserId)
+    protected function introduceUserLocally($userData)
     {
-        $auth0Api = new \Auth0\SDK\Auth0Api($idToken, $this->getConfig()['auth0Domain']);
-        $userData = $auth0Api->users->get($auth0UserId);
-
         $newLocalUser = $this->getUserFactory()->create();
         $this->updateUserWithData($newLocalUser, $userData);
 
